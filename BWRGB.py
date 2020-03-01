@@ -1,6 +1,6 @@
 from PIL import Image
 
-img = Image.open('random.png')
+img = Image.open('Example.png')
 size = img.size
 pixels = img.load()
 
@@ -31,4 +31,4 @@ for i in range(size[1]):
         
         
 img.show()
-img.save('ModifiedRandom.png')
+img.save('ExampleRandom.png')
