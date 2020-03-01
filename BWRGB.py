@@ -8,7 +8,7 @@ for i in range(size[1]):
     for j in range(size[0]):
         if (len(pixels[0,0]) == 4):
             (R,G,B,A) = img.getpixel((j,i))
-            MMM = list(R,G,B)
+            MMM = list((R,G,B))
             MMM.sort()
             T = MMM[1]
             if (G==MMM[2]):
