@@ -31,4 +31,4 @@ for i in range(size[1]):
 
 
 img.show()
-img.save('ModifiedExample.png')
+img.save('BWCMYExample.png')
