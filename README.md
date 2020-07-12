@@ -13,3 +13,10 @@ Image filter similar to Black and White filter, but in addition to shades of Bla
 Here is example of changes that images go through when code is running
 
 <img src="https://github.com/VusalShahbazzadeh/Image-Filters/blob/master/Example.png" width="300"  /> <img src="https://github.com/VusalShahbazzadeh/Image-Filters/blob/master/BWCMYExample.png" width="300" />
+
+## CC
+The algorithm chooses closest color in given set. Yellow, red and black colors were chosen as default colors.
+
+Here is example of changes that images go through when code is running
+
+<img src="https://github.com/VusalShahbazzadeh/Image-Filters/blob/master/Example.png" width="300"  /> <img src="https://github.com/VusalShahbazzadeh/Image-Filters/blob/master/CCExample.png" width="300" />
