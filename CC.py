@@ -10,13 +10,10 @@ pixels = img.load()
 brightness_scaler = 1
 
 colors = [
-    (255, 0, 0),
-    (0, 0, 0),
-    (255, 255, 0)
 ]
 
-use_auto_color_choice = False
-number_of_colors = 7
+use_auto_color_choice = True
+number_of_colors = 20
 # Modify only above this
 if use_auto_color_choice:
     pixel_array = []
@@ -44,7 +41,8 @@ if use_auto_color_choice:
     for i in range(len(centers)):
         tuple_centers.append(array3_to_tuple_int(centers[i]))
 
-    colors = tuple_centers
+    for i in range(len(tuple_centers)):
+        colors.append(tuple_centers[i])
 
 
 def dis(c1, c2):
@@ -73,4 +71,4 @@ for i in range(size[1]):
         pixels[j, i] = tempcolor if len(pixels[j, i]) == 3 else (
             tempcolor[0], tempcolor[1], tempcolor[2], pixels[j, i][3])
 
-img.save('CCExample.png')
+img.save('CCAutoExample.png')
