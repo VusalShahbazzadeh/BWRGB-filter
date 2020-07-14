@@ -20,3 +20,9 @@ The algorithm chooses closest color in given set. Yellow, red and black colors w
 Here is example of changes that images go through when code is running
 
 <img src="https://github.com/VusalShahbazzadeh/Image-Filters/blob/master/Example.png" width="300"  /> <img src="https://github.com/VusalShahbazzadeh/Image-Filters/blob/master/CCExample.png" width="300" />
+
+Although for best result it is better to set colors manually, there is an option to set colors automatically by only setting number of desired colors. 
+
+Here is example of changes that images go through when code is running (20 colors)
+
+<img src="https://github.com/VusalShahbazzadeh/Image-Filters/blob/master/Example.png" width="300"  /> <img src="https://github.com/VusalShahbazzadeh/Image-Filters/blob/master/CCAutoExample.png" width="300" />
