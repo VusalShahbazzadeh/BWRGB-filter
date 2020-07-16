@@ -26,3 +26,10 @@ Although for best result it is better to set colors manually, there is an option
 Here is example of changes that images go through when code is running (20 colors)
 
 <img src="https://github.com/VusalShahbazzadeh/Image-Filters/blob/master/Example.png" width="300"  /> <img src="https://github.com/VusalShahbazzadeh/Image-Filters/blob/master/CCAutoExample.png" width="300" />
+
+##PC
+The algorithm clusters pixels taking into accaount positions of pixels, and color.
+
+Here is example of changes that images go through when code is running
+
+<img src="https://github.com/VusalShahbazzadeh/Image-Filters/blob/master/Example.png" width="300"  /> <img src="https://github.com/VusalShahbazzadeh/Image-Filters/blob/master/PCExample.png" width="300" />
