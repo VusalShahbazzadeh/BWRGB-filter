@@ -1,774 +1,572 @@
-1.Python ilə sadə bir IP skaner necə yazılır?
-import socket
-import ipaddress
-
-def scan_ip(ip, port):
-    try:
-        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-            s.settimeout(1)
-            s.connect((ip, port))
-            return True
-    except:
-        return False
+#1
 
-ip_range = ipaddress.ip_network('192.168.1.0/24')
-for ip in ip_range.hosts():
-    for port in [22, 80, 443]:  # Nümunə olaraq 22, 80, ve 443 nömrəli portlar yoxlanılır
-        if scan_ip(str(ip), port):
-            print(f"Açıq port tapıldı: {ip} port {port}")
-2.Bir şəbəkə qurğusunun konfiqurasiya faylını Python ilə necə təhlil edə bilərsiniz?
-Bir şəbəkə qurğusunun konfiqurasiya faylını təhlil etmək üçün Python-dan istifadə edərkən bir neçə üsul var. Konfiqurasiya faylının formatı (məsələn, INI, XML, JSON, və ya xüsusi bir format) əsasında yanaşma dəyişə bilər. Aşağıdakı metodlardan istifadə oluna bilər:
-
-1. Standart Kitabxana Modullarını İstifadə Etmək: Python, INI, XML, JSON kimi yaygın fayl formatlarını oxumaq və yazmaq üçün daxili modullara malikdir (`configparser`, `xml.etree.ElementTree`, `json` və s.). Bu modullar standart formatdakı faylları asanlıqla işləməyə imkan verir.
-
-2. Regex İstifadə Etmək: Əgər konfiqurasiya faylı xüsusi bir formatdadırsa və ya müəyyən məlumatları çıxarmaq istəyirsinizsə, `re` modulu ilə düzenli ifadələr istifadə edə bilərsiniz. Bu, mətn içərisindən spesifik məlumatları tapmaq və çıxarmaq üçün güclü bir yoldur.
-
-3.Yazılmış Kitabxanalardan İstifadə Etmək: Bəzi şəbəkə qurğuları üçün (məsələn, Cisco, Juniper) Python kitabxanaları mövcuddur. Bu kitabxanalar, həmin qurğuların konfiqurasiya fayllarını oxumaq və təhlil etmək üçün xüsusi olaraq hazırlanmışdır (məsələn, `pyats`, `napalm`).
-
-4. Faylı Oxuyub Təhlil Etmək: `open()` funksiyasını istifadə edərək faylı açıb, satır satır oxuyaraq lazımi məlumatları çıxara bilərsiniz. Bu metod, fayl strukturu sadə və mütəmadi olarsa işləyir.
-
-5. YAML və digər Formatlar: Əgər konfiqurasiya faylı YAML kimi bir formatda yazılmışsa, uyğun kitabxanalardan (məsələn, `pyyaml`) istifadə etmək mümkündür.
-
-6. Pandas Kitabxanası: Əgər konfiqurasiya məlumatları cədvəl formatında (məsələn, CSV) təqdim edilirsə, `pandas` kitabxanası bu məlumatları asanlıqla oxuyub işləyə bilər.
-
-Fərz edək ki, bizim şəbəkə qurğumuzun konfiqurasiya faylı sadə mətn formatında və aşağıdakı kimi xüsusiyyətlərə malikdir:
-
-- Hər bir konfiqurasiya sətirində `ayar_adi=deyer` formatı istifadə edilir.
-- Fayl içərisində şərh sətrləri `#` işarəsi ilə başlayır.
-
-Bu tip bir konfiqurasiya faylını Python ilə təhlil etmək üçün, biz faylı oxuyacaq, hər bir ayarı ayrı-ayrılıqda təhlil edəcək və nəticələri bir lüğət (dictionary) daxilində saxlayacağıq. İndi bu prosesi bir Python skripti ilə necə həyata keçirə biləcəyimizi göstərək:
-
-```python
-def konfigurasiya_faylini_oxu(fayl_yolu):
-    konfigurasiya = {}
-    with open(fayl_yolu, 'r') as fayl:
-        for satir in fayl:
-            satir = satir.strip()
-            # Şərh və boş sətirləri yoxlama
-            if satir.startswith("#") or not satir:
-                continue
-            # Ayar adını və dəyərini ayırma
-            if '=' in satir:
-                ayar_adi, deyer = satir.split('=', 1)
-                konfigurasiya[ayar_adi.strip()] = deyer.strip()
-    return konfigurasiya
-
-# Konfiqurasiya faylını oxuyun və nəticələri göstərin
-konfigurasiya = konfigurasiya_faylini_oxu("yol/konfigurasiya_fayli.txt")
-print(konfigurasiya)
-```
+Imagine you've been tasked with conducting a penetration test on a small business's Wi-Fi network. How would you approach identifying potential vulnerabilities, and what tools would you use to exploit them ethically?
 
-Bu skript, göstərilən yoldakı konfiqurasiya faylını oxuyur və hər bir ayarı bir lüğətə (key-value pairs) çevirir. Bu lüğət, ayar adlarını açar (key) olaraq və müvafiq dəyərləri dəyər (value) olaraq saxlayır. Skript, şərh və boş sətirləri nəzərə almadan yalnızca konfiqurasiyanı işləyir.
+Conducting a *penetration test* on a Wi-Fi network involves systematically assessing its security and identifying vulnerabilities. Here's an ethical approach to achieve this:
 
-3.Python ilə bir şifrələmə alqoritmini necə həyata keçirə bilərsiniz?
-Python ilə şifrələmə alqoritmi həyata keçirmək üçün, ən sadə yanaşma bir çevrilmə (substitution) şifrəsindən istifadə etməkdir. Bu nümunədə, biz "Caesar Cipher" adlanan klassik bir şifrələmə metodu istifadə edəcəyik. Caesar Cipher, hər hərfi əlifbanın içində müəyyən bir sayda mövqelər ilə irəli və ya geri sürüşdürməklə işləyir. Məsələn, 3 mövqe ilə sürüşdürmə ilə 'A' hərfi 'D' olur, 'B' isə 'E', və s.:
-1. `encrypt` funksiyası verilmiş mətni şifrələyəcək.
-2. `decrypt` funksiyası şifrələnmiş mətni orijinal halına qaytaracaq.
+1. *Scoping and Authorization*:
+   - Begin by defining the scope of the test. Understand the business's requirements, goals, and limitations.
+   - Obtain proper authorization from the business owner or relevant stakeholders.
 
-Bu nümunə üçün hər hərfi üç mövqe irəli sürüşdürəcəyik.
+2. *Reconnaissance*:
+   - Gather information about the target network:
+     - Identify the Wi-Fi access points (APs) and their configurations.
+     - Discover SSIDs (network names), BSSIDs (MAC addresses), and encryption methods (WEP, WPA, WPA2, WPA3).
+     - Map the physical layout of the network.
 
-Yuxarıda verilmiş Python kodu ilə Caesar Cipher şifrələmə və deşifrələmə funksiyalarını həyata keçirdik. Bu nümunədə, hər hərfi üç mövqe irəli sürüşdürdük.
+3. *Passive Scanning*:
+   - Use tools like *Kismet* or *NetStumbler* to passively scan for nearby Wi-Fi networks.
+   - Collect information about neighboring networks, channels, and signal strengths.
 
-- Orijinal mətn: `"Hello, World!"`
-- Şifrələnmiş mətn: `"Khoor, Zruog!"`
-- Deşifrə edilmiş mətn: `"Hello, World!"`
+4. *Active Scanning*:
+   - Employ tools like *Aircrack-ng, **Wireshark, and **Reaver* for active scanning:
+     - Capture Wi-Fi packets to analyze network traffic.
+     - Identify weak encryption or authentication mechanisms.
+     - Detect rogue APs or unauthorized devices.
 
-Bu kod, hərfləri sürüşdürərək şifrələyir və şifrələnmiş mətni yenidən orijinal halına qaytarır. Diqqət edilməsi lazım olan məqam, bu kodun yalnız hərfləri (latın əlifbasını) şifrələməsi və digər simvolları (məsələn, nöqtə, vergül) dəyişdirməməsidir. Bu, Caesar Cipher'ın ən sadə nümunəsidir və daha mürəkkəb şifrələmə tələbləri üçün daha güclü kriptografiya metodlarından istifadə etmək lazımdır.
-def caesar_cipher_encrypt(text, shift):
-    encrypted_text = ""
-    for char in text:
-        if char.isalpha():  # Yalnız hərfləri şifrələ
-            shift_amount = shift % 26
-            char_code = ord(char) + shift_amount
-            if char.isupper():
-                char_code = 65 + (char_code - 65) % 26
-            else:
-                char_code = 97 + (char_code - 97) % 26
-            encrypted_text += chr(char_code)
-        else:
-            encrypted_text += char
-    return encrypted_text
+5. *Authentication and Authorization Testing*:
+   - Attempt to crack Wi-Fi passwords using tools like *Hashcat* or *Fern Wifi Cracker*.
+   - Test default credentials or weak passwords on APs.
 
-def caesar_cipher_decrypt(encrypted_text, shift):
-    return caesar_cipher_encrypt(encrypted_text, -shift)
+6. *Deauthentication and Disassociation Attacks*:
+   - Use tools like *Aireplay-ng* to force clients to disconnect from the network.
+   - Observe how the network responds to these attacks.
 
-# Nümunə şifrələmə və deşifrələmə
-original_text = "Hello, World!"
-shift_amount = 3
+7. *Evil Twin Attacks*:
+   - Create a fake AP with the same SSID as the target network.
+   - Lure clients to connect to the rogue AP and capture their traffic.
 
-encrypted = caesar_cipher_encrypt(original_text, shift_amount)
-decrypted = caesar_cipher_decrypt(encrypted, shift_amount)
+8. *WPS Attacks*:
+   - Exploit Wi-Fi Protected Setup (WPS) vulnerabilities using tools like *Reaver*.
+   - Attempt to retrieve WPS PINs and gain unauthorized access.
 
-original_text, encrypted, decrypted
+9. *Packet Injection and Replay Attacks*:
+   - Validate the robustness of encryption protocols (WEP, WPA, WPA2) by injecting malicious packets.
+   - Replay captured packets to simulate an attack.
 
-4.Bir şəbəkə qurğusunun avtomatik konfiqurasiyası üçün Python skripti necə yazılır?
-Bir şəbəkə qurğusunun avtomatik konfiqurasiyası üçün Python skripti yazmaq, şəbəkə avtomatlaşdırmasının əsas hissəsidir. Bu cür skriptlər, şəbəkə qurğularını konfiqurasiya etmək, statuslarını yoxlamaq və məlumat toplamaq üçün istifadə edilir. Şəbəkə avtomatlaşdırması üçün ən populyar kitabxanalardan biri `netmiko`dur. `netmiko`, Cisco, Juniper, Arista və bir çox digər şəbəkə cihazlarını dəstəkləyən multi-vendor kitabxanadır.
+10. *Cracking Handshakes*:
+    - Capture WPA/WPA2 handshakes during client authentication.
+    - Use tools like *Aircrack-ng* to crack the captured handshakes.
 
-Aşağıda, bir Cisco router'ını konfiqurasiya etmək üçün sadə bir `netmiko` skripti nümunəsi verilmişdir. Bu nümunədə, biz router'a bağlanıb, bir neçə konfiqurasiya əmri göndərəcəyik və sonra dəyişiklikləri tətbiq edəcəyik.
+11. *Post-Exploitation Assessment*:
+    - Once vulnerabilities are identified, assess their impact:
+      - Can an attacker gain unauthorized access?
+      - Is sensitive data exposed?
+    - Provide recommendations for remediation.
 
-Əvvəlcə, `netmiko` kitabxanasını quraşdırmaq lazımdır. Bunu `pip install netmiko` komandası ilə edə bilərsiniz.
 
-Nümunə Python Skripti:
+During a penetration test, you come across a VoIP system that lacks proper security measures. Explain the potential risks associated with exploiting vulnerabilities in VoIP systems and the ethical considerations in reporting these findings to the organization.
+(both open source and commercial use must be considerd)
 
-```python
-from netmiko import ConnectHandler
 
-# Şəbəkə cihazının konfiqurasiya detalları
-device = {
-    'device_type': 'cisco_ios',  # Cihaz növü
-    'host': '192.168.1.1',       # Cihazın IP ünvanı
-    'username': 'admin',         # İstifadəçi adı
-    'password': 'yourpassword',  # Şifrə
-    'port': 22,                  # SSH portu (əksər hallarda 22)
-}
+When assessing a Voice over Internet Protocol (VoIP) system during a penetration test, it's crucial to understand the potential risks and ethical considerations. Let's delve into both aspects:
 
-# Bağlantı yaradılır
-net_connect = ConnectHandler(**device)
+### *Potential Risks Associated with VoIP Vulnerabilities:*
 
-# Göndəriləcək konfiqurasiya əmrləri
-commands = [
-    'conf t',
-    'interface GigabitEthernet0/1',
-    'description Python ile konfiqurasiya',
-    'ip address 10.0.0.1 255.255.255.0',
-    'no shutdown',
-    'end'
-]
+1. *Call Eavesdropping*:
+   - Exploiting vulnerabilities can allow unauthorized parties to intercept and listen to VoIP calls.
+   - Sensitive information (such as financial details, passwords, or business strategies) transmitted over VoIP becomes vulnerable.
 
-# Əmrlərin göndərilməsi
-output = net_connect.send_config_set(commands)
+2. *Call Tampering and Injection*:
+   - Attackers can manipulate call content by injecting malicious data into VoIP packets.
+   - Tampering with calls can lead to misinformation, unauthorized call redirection, or even denial-of-service (DoS) attacks.
 
-# Əlaqənin sonlandırılması
-net_connect.disconnect()
+3. *Denial of Service (DoS)*:
+   - VoIP services rely on network availability. Exploiting vulnerabilities can disrupt service availability.
+   - Attackers can flood the system with excessive traffic, causing call drops or rendering the system unusable.
 
-# Çıxışın çap edilməsi
-print(output)
-```
+4. *VoIP Spam (SPIT)*:
+   - Similar to email spam, VoIP spam (SPIT) floods the system with unwanted calls.
+   - It consumes bandwidth, affects call quality, and disrupts legitimate communication.
 
-Bu skript, müəyyən bir router'a SSH vasitəsilə bağlanır, müəyyən interfeysi konfiqurasiya edir (məsələn, IP ünvan təyin edir, təsvir əlavə edir, və interfeysi aktivləşdirir) və sonra dəyişiklikləri tətbiq edir.
+5. *Weak Authentication and Authorization*:
+   - Default or weak credentials on VoIP devices allow unauthorized access.
+   - Attackers can impersonate users, gain control over accounts, and manipulate call routing.
 
-5.Python ilə log fayllarını təhlil etmək üçün nümunə skript necə olur?
-Python ilə log fayllarını təhlil etmək üçün skript yazmaq, adətən, log fayllarını oxumaq, məlumatları axtarış kriteriyalarına əsasən süzmək və nəticələri təhlil etmək üçün lazımdır. Aşağıda sadə bir nümunə verəcəyəm ki, bu skript bir log faylından məlumatları oxuyub, hər bir xətt üzərində müəyyən bir axtarış kriteriyasına əsasən filtrasiya edəcək və uyğun gələn sətirləri göstərəcək.
+6. *Protocol Vulnerabilities*:
+   - Flaws in VoIP protocols (such as SIP or H.323) can lead to unauthorized call setup, session hijacking, or buffer overflows.
+   - Attackers exploit these weaknesses to compromise the system.
 
-Əsas fikir, `open` funksiyasını istifadə edərək log faylını oxumaq və hər bir xətt üzərində müəyyən bir şərti (məsələn, xüsusi bir söz və ya fraze varsa) yoxlamaqdır.
+7. *Media Encryption Weaknesses*:
+   - Inadequate encryption can expose voice data during transmission.
+   - Attackers can intercept and decode sensitive conversations.
 
-Məsələn, bir web server log faylında 404 xəta kodlarını axtaran bir skript yazaq:
+### *Ethical Considerations in Reporting Findings:*
 
+1. *Authorization and Scope*:
+   - Ensure proper authorization before testing.
+   - Stick to the defined scope to avoid unintended consequences.
 
-# Log faylının yolu
-log_file_path = 'path/to/your/logfile.log'
+2. *Transparency and Communication*:
+   - Clearly document findings, including vulnerabilities and their impact.
+   - Communicate openly with the organization about risks and potential consequences.
 
-# Axtarılacaq fraze
-search_term = '404'
+3. *Risk Assessment*:
+   - Evaluate the severity of each vulnerability.
+   - Consider the impact on confidentiality, integrity, and availability.
 
-# Log faylını oxuyub axtarış aparılacaq funksiya
-def analyze_log(file_path, term):
-    with open(file_path, 'r') as file:
-        for line in file:
-            if term in line:
-                print(line.strip())
+4. *Disclosure Timeline*:
+   - Report vulnerabilities promptly to the organization.
+   - Allow time for remediation before public disclosure.
 
-# Log faylını təhlil etmək
-analyze_log(log_file_path, search_term)
-```
+5. *Legal and Regulatory Compliance*:
+   - Understand legal obligations related to vulnerability disclosure.
+   - Comply with relevant regulations (e.g., GDPR, HIPAA).
 
-Bu skript, göstərilən log faylındakı hər bir xətti oxuyur və hər xətt üçün `404` sözünü axtarır. Bu söz tapıldıqda, uyğun xətt ekrana çap olunur.
+6. *Mitigation Recommendations*:
+   - Provide actionable recommendations for fixing vulnerabilities.
+   - Balance transparency with responsible disclosure.
 
-Bu sadə nümunəni fərqli axtarış kriteriyaları və daha mürəkkəb log təhlili üçün genişləndirmək mümkündür. Məsələn, müəyyən bir tarix aralığında olan xətalara baxmaq, xüsusi IP ünvanlarından gələn sorğuları təhlil etmək, və s. üçün əlavə şərtlər və regular ifadələr (regex) istifadə edilə bilər.
-6.Python ilə bir zərərli proqram təhlili skripti necə hazırlanır?
-Zərərli proqramların təhlili, həssas və mürəkkəb bir sahədir və bu sahədə işləmək üçün xüsusi təlim və biliklər tələb olunur. Zərərli proqramları təhlil edərkən həm təhlükəsizlik məsələləri, həm də qanuni aspektlər nəzərə alınmalıdır. Bununla birlikdə, Python ilə zərərli proqramları təhlil etmək üçün istifadə edilə biləcək əsas yanaşmaları qısaca izah edə bilərəm.
 
-Python ilə Zərərli Proqram Təhlili Üçün Ümumi Yanaşmalar
-Statik Təhlil:
-   - Fayl Şifrələnməsini Yoxlama:Zərərli proqramların tanınması üçün MD5, SHA-1 və ya SHA-256 kimi hash dəyərlərinin yoxlanması.
-   - String Təhlili: Faylda mətn stringlərini (URL-lər, IP ünvanları, şübhəli sözlər) axtarmaq.
-   - Fayl Formatı Təhlili: PE başlıqları, DLL asılılıqları və s. kimi fayl strukturlarını təhlil etmək.
+You've discovered a Windows system with weak password protection during a penetration test. Discuss the ethical implications of using password cracking techniques to access sensitive information stored on the system and how you would responsibly handle this situation.
 
-Dinamik Təhlil:
-   - Şəbəkə Fəaliyyətinin İzlənməsi:Zərərli proqram tərəfindən yaradılan şəbəkə trafikini təhlil etmək.
-   - Sistem Çağırışlarının İzlənməsi: Zərərli proqramın sistemə etdiyi çağırışları və fayl əməliyyatlarını izləmək.
 
-Avtomatlaşdırılmış Təhlil Alətləri:
-   - Zərərli fayllar üzərində nümunələrə əsaslanan təhlil aparmaq üçün qaydalar yaratmaq.
+Let's delve into the ethical implications and responsible handling of this scenario:
 
-Python Skripti Nümunəsi: Statik String Təhlili
-Bu sadə nümunə, zərərli proqram təhlili üçün bir faylda şübhəli stringləri axtarır.
+### *Ethical Implications:*
 
-import re
+1. *Informed Consent*:
+   - As a penetration tester, you must have proper authorization to conduct security assessments.
+   - Unauthorized access violates ethical boundaries and legal norms.
 
-def scan_file(file_path):
-    # Şübhəli stringlərin siyahısı
-    suspicious_patterns = ['http://', 'https://', 'cmd.exe', 'nc.exe', 'powershell']
-    
-    # Faylı açıb təhlil etmək
-    with open(file_path, 'rb') as file:
-        contents = file.read().decode(errors='ignore')
-        for pattern in suspicious_patterns:
-            if
+2. *Balancing Security and Privacy*:
+   - Cracking passwords to access sensitive information can compromise user privacy.
+   - Balancing security needs with privacy rights is essential.
 
- re.search(pattern, contents):
-                print(f"Şübhəli string tapıldı: {pattern}")
+3. *Potential Harm*:
+   - Accessing sensitive data without consent can harm individuals or organizations.
+   - Consider the impact on confidentiality, integrity, and availability.
 
-# Fayl yolu
-file_path = 'path/to/malware.exe'
-scan_file(file_path)
-```
+4. *Professional Responsibility*:
+   - Ethical hackers adhere to professional standards.
+   - Avoid actions that harm others or violate trust.
 
-Bu skript, faylda şübhəli stringlər axtarır və tapıldıqda bildirir. Lakin, bu yalnız çox sadə bir nümunədir və həqiqi zərərli proqram təhlili üçün daha mürəkkəb yanaşmalar və alətlər tələb olunur.
-7.Python ilə bir faylın kriptoanalizi üçün skript necə yazılır?
-Kriptoanaliz, şifrəli məlumatların şifrəsini açmaq və ya şifrələmə alqoritmlərinin zəifliklərini tapmaq üçün istifadə edilən bir texnikadır. Python ilə sadə bir kriptoanaliz skripti yazmaq mümkündür, ancaq bu, həqiqətən də geniş və mürəkkəb bir sahədir. Ən yaygın və sadə nümunə olaraq, bir mətnin Caesar Cipher ilə şifrələndiyini düşünərək, bu şifrəni açmaq üçün bir skript yaza bilərik.
+### *Responsible Handling:*
 
-Bu nümunədə, mətnin hər bir hərfini əlifbanın bütün mümkün mövqeləri boyunca sürüşdürərək (brute force metodu ilə), orijinal mətni tapmağa çalışacağıq. Bu metod, xüsusilə Caesar Cipher kimi sadə şifrələmə üsulları üçün effektivdir.
+1. *Document Findings*:
+   - Thoroughly document the weak password discovery.
+   - Include details such as the account affected and the severity of the vulnerability.
 
-Aşağıda, Caesar Cipher ilə şifrələnmiş bir mətnin kriptoanalizini aparmaq üçün Python skripti verilmişdir:
+2. *Risk Assessment*:
+   - Evaluate the risk associated with the weak password.
+   - Consider the sensitivity of the stored information.
 
-```python
-def caesar_cipher_decrypt(cipher_text):
-    alphabet = 'abcdefghijklmnopqrstuvwxyz'
-    for key in range(len(alphabet)):
-        decrypted_text = ''
+3. *Notify Stakeholders*:
+   - Inform the organization's management or IT team.
+   - Provide clear details about the vulnerability.
 
-        for char in cipher_text:
-            if char in alphabet:
-                position = alphabet.find(char)
-                new_position = (position - key) % 26
-                decrypted_text += alphabet[new_position]
-            else:
-                decrypted_text += char
+4. *Recommendations for Mitigation*:
+   - Suggest remediation steps:
+     - *Password Policy Enhancement*: Recommend enforcing strong password policies.
+     - *User Education*: Advise users on creating secure passwords.
+     - *Multi-Factor Authentication (MFA)*: Encourage MFA implementation.
 
-        print(f"Key {key}: {decrypted_text}")
+5. *Avoid Unauthorized Access*:
+   - Do not crack passwords to access sensitive data.
+   - Respect user privacy and organizational boundaries.
 
-# Şifrələnmiş mətn
-cipher_text = "Khoor, Zruog!"
+6. *Timely Reporting*:
+   - Report findings promptly.
+   - Allow time for remediation before public disclosure
 
-# Şifrənin açılması
-caesar_cipher_decrypt(cipher_text.lower())
-```
+#2 
 
-Bu skript, verilmiş şifrəli mətn üçün əlifbanın bütün mümkün sürüşmələrini (0-dan 25-ə qədər) sınaqdan keçirir və hər bir açar üçün mümkün deşifrə edilmiş mətni göstərir. Caesar Cipher üçün doğru açar tapıldıqda, mətn mənasını almış olacaq.
-8.Python-da bir şəbəkə trafikini izləmək üçün skript necə yazılır?
-Python ilə şəbəkə trafikini izləmək üçün `scapy` kimi paketləri istifadə etmək mümkündür. `scapy` güclü və interaktiv bir şəbəkə paketi manipulyasiya kitabxanasıdır ki, şəbəkə paketlərini yaratmaq, göndərmək, təhlil etmək və qəbul etmək üçün istifadə olunur.
 
-Aşağıda, `scapy` istifadə edərək sadə bir şəbəkə trafik izləmə skripti nümunəsini verəcəyəm. Bu skript, şəbəkə interfeysi vasitəsilə keçən paketləri dinləyir və onları ekrana çıxarır.
+You've discovered that a company's Wi-Fi network is using an outdated encryption protocol that is susceptible to known attacks. Discuss the ethical considerations in advising the organization to upgrade their Wi-Fi security measures and the potential consequences of not taking action.
 
-Əvvəlcə, `scapy` kitabxanasını quraşdırılması:
+Let's delve into the ethical considerations and potential consequences related to advising an organization to upgrade their Wi-Fi security measures.
 
-pip install scapy
+1. *Ethical Considerations*:
+    - *Transparency*: As an ethical advisor, it's crucial to be transparent about the security risks. The organization should be informed promptly and clearly about the outdated encryption protocol and its vulnerabilities.
+    - *Informed Consent*: Obtain informed consent from the organization before proceeding with any changes. Explain the risks, benefits, and potential impact of upgrading the security measures.
+    - *Balancing Interests*: Consider the balance between security and operational disruptions. Upgrading may cause temporary disruptions, affecting productivity. Weigh this against the long-term security benefits.
+    - *Legal and Regulatory Compliance*: Ensure that the proposed upgrade aligns with legal requirements and industry standards. Compliance with data protection laws (such as GDPR) is essential.
+    - *Cost-Benefit Analysis*: Evaluate the cost of upgrading versus the potential losses due to a security breach. Ethically, the organization should invest in security, but practical constraints exist.
 
-Daha sonra aşağıdakı skripti yazaraq şəbəkə trafikini izləyə bilərik:
+2. *Potential Consequences of Not Taking Action*:
+    - *Data Breaches: Outdated encryption protocols are susceptible to attacks like **WEP cracking* or *KRACK*. A breach could expose sensitive data (customer records, financial information, trade secrets).
+    - *Reputation Damage*: A security incident tarnishes the organization's reputation. Customers lose trust, affecting business relationships and future growth.
+    - *Legal Liabilities*: Failure to secure data may lead to legal consequences. Fines, lawsuits, and regulatory penalties can be severe.
+    - *Operational Disruptions*: If an attack occurs, operations may halt. Restoring services and investigating the breach consumes resources.
+    - *Financial Losses*: Beyond legal costs, there are financial implications—lost revenue, recovery expenses, and potential insurance claims.
+    - *Competitive Disadvantage*: Security lapses impact competitiveness. Clients may choose competitors with better security practices.
 
+In summary, ethical advising involves transparency, informed consent, and balancing security needs with operational realities. Urging the organization to upgrade their Wi-Fi security is not only ethically responsible but also essential for safeguarding their assets and reputation.
 
-from scapy.all import sniff
 
-# Paketləri təhlil etmək üçün funksiya
-def process_packet(packet):
-    print(packet.show())
+In a scenario where you've gained access to a company's network through a compromised VoIP system, discuss the ethical implications of using this access to escalate privileges and explore sensitive areas of the network.
 
-# Şəbəkə trafikini izləmək
-sniff(prn=process_packet, store=False)
-```
 
-Bu skript `sniff` funksiyasını istifadə edərək şəbəkə trafikini dinləyir və hər bir paket üzərində `process_packet` funksiyasını çağırır. `process_packet` funksiyası hər bir paketi ekrana çıxarır. `store=False` parametri, paketlərin yaddaşda saxlanmasını dayandırır ki, bu, yaddaş istifadəsini azaldır.
-9.Python ilə e-poçt təhlükəsizliyi üçün skript necə yazılır?
-E-poçt təhlükəsizliyi üçün Python ilə skript yazmaq, e-poçtların şifrələnməsi, doğrulanması və təhlükəsiz bir şəkildə göndərilməsi üzərində fokuslanır. Bu, genellikle SSL/TLS şifrələməsini, güclü parol doğrulamasını və mümkünsə e-poçt mətninin şifrələnməsini əhatə edir. 
+let's delve into the ethical implications of such a scenario.
 
-Python'un `smtplib` və `email` modulları, e-poçtları təhlükəsiz bir şəkildə göndərmək üçün istifadə edilə bilər. Aşağıda, SSL ilə qorunan bir SMTP serveri vasitəsilə e-poçt göndərən sadə bir Python skripti nümunəsi verilmişdir.
+1. *Unauthorized Access and Intrusion*:
+    - *Ethical Violation*: Gaining unauthorized access to a network through a compromised VoIP system is a clear violation of ethical norms. It breaches trust, privacy, and security boundaries.
+    - *Consequences*: Unauthorized intrusion undermines the organization's security posture and jeopardizes its operations.
 
-Əvvəlcə, lazımi modulları idxal edin:
+2. *Privilege Escalation*:
+    - *Ethical Dilemma*: Escalating privileges beyond the initial compromise is ethically questionable. It involves intentionally exploiting vulnerabilities to gain higher access levels.
+    - *Consequences*:
+        - *Legal Implications*: Privilege escalation may violate laws related to unauthorized access, computer fraud, and data breaches.
+        - *Trust Erosion*: The breach of trust can have severe consequences for relationships with clients, partners, and employees.
+        - *Reputation Damage*: The organization's reputation suffers if it becomes known that an insider exploited vulnerabilities.
+        - *Financial Losses*: Remediation costs, legal fees, and potential fines impact the organization's finances.
 
+3. *Exploring Sensitive Areas*:
+    - *Ethical Boundaries*: Delving into sensitive areas (such as confidential databases, financial records, or intellectual property) crosses ethical boundaries.
+    - *Consequences*:
+        - *Data Exposure*: Unauthorized exploration risks exposing sensitive data, leading to potential misuse or leaks.
+        - *Business Continuity*: Disruptions caused by unauthorized exploration can affect business continuity.
+        - *Stakeholder Impact*: Employees, customers, and partners may suffer if their data or operations are compromised.
 
-import smtplib
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
-```
+4. *Ethical Decision-Making*:
+    - *Balancing Interests*: Ethical advisors must weigh the interests of the organization, its stakeholders, and the broader community.
+    - *Duty to Report*: Ethical responsibility includes reporting the vulnerability to the organization's security team or management.
+    - *Mitigation Strategies*: Instead of exploring sensitive areas, focus on helping the organization remediate the vulnerability.
 
-Sonra, e-poçt məlumatlarını və mesajı hazırlayın:
+5. *Alternatives*:
+    - *White Hat Approach*: Use your access to identify vulnerabilities and report them responsibly.
+    - *Educational Purpose*: Seek permission to demonstrate the risks to the organization's leadership.
+    - *Legal Consultation*: Consult legal experts to understand the implications fully.
 
-```
-# Göndərən və alıcı e-poçt ünvanları
-sender_email = "your_email@example.com"
-receiver_email = "receiver_email@example.com"
-password = input("Type your password and press enter: ")
+In summary, ethical behavior demands restraint, transparency, and a commitment to protecting the organization's interests while respecting privacy and security norms. Advising the organization to address the vulnerability promptly and responsibly is the ethical path forward.
 
-# E-poçtun məzmununu yaratmaq
-message = MIMEMultipart("alternative")
-message["Subject"] = "Test Email"
-message["From"] = sender_email
-message["To"] = receiver_email
 
-# E-poçtun mətnini və HTML versiyasını yaratmaq
-text = """\
-Hi,
-How are you?
-Real Python has many great tutorials."""
-html = """\
-<html>
-  <body>
-    <p>Hi,<br>
-       How are you?<br>
-       <a href="https://www.realpython.com">Real Python</a> has many great tutorials.
-    </p>
-  </body>
-</html>
-"""
+You've identified a vulnerability in a company's file transfer protocol (FTP: 20-21) server that could potentially lead to unauthorized access to confidential documents. Discuss the ethical considerations in responsibly disclosing this vulnerability to the organization and recommending secure alternatives for file transfer.
 
-# Mətn və HTML hissələrini MIMEText obyektləri kimi əlavə etmək
-part1 = MIMEText(text, "plain")
-part2 = MIMEText(html, "html")
 
-# Mesaja hər iki hissəni əlavə etmək
-message.attach(part1)
-message.attach(part2)
-```
+Certainly! Let's explore the ethical considerations surrounding the responsible disclosure of this FTP vulnerability and propose secure alternatives for file transfer.
 
-Daha sonra, SMTP serveri ilə bağlantı qurun və mesajı göndərin:
+1. *Ethical Considerations in Responsible Disclosure*:
+    - *Build Trust*: Trust is essential. Assume benevolence as a motive for all parties involved. Coordinate actions to reduce harm while ensuring transparency¹.
+    - *Inform the Affected Party First*: Prioritize timely and precise communication with the organization whose system is vulnerable. Despite obstacles, provide information to the affected vendor¹.
+    - *Protect People*: The primary goal of disclosing vulnerabilities should be to protect users and society. Personal recognition should not overshadow safety².
+    - *Balance Public Interest and Risk*: Researchers must decide what is ethical. Responsible disclosure allows time for a fix, minimizing risk².
+    - *Avoid Unauthorized Exploration*: Ethically, refrain from exploring sensitive areas beyond the initial vulnerability. Focus on remediation³.
 
-```python
-# Təhlükəsiz bağlantı ilə SMTP serverinə qoşulmaq
-context = ssl.create_default_context()
-with smtplib.SMTP_SSL("smtp.example.com", 465, context=context) as server:
-    server.login(sender_email, password)
-    server.sendmail(sender_email, receiver_email, message.as_string())
-```
+2. *Recommendations for Secure Alternatives*:
+    - *SFTP (SSH File Transfer Protocol)*: SFTP provides secure file transfer over SSH. It encrypts data during transmission and authenticates users using public keys or passwords.
+    - *FTPS (FTP Secure)*: FTPS combines FTP with SSL/TLS encryption. It secures data in transit and authenticates both the server and client.
+    - *HTTPS (Hypertext Transfer Protocol Secure)*: Use HTTPS for web-based file transfers. It encrypts data using SSL/TLS and is widely supported.
+    - *Managed File Transfer (MFT)*: MFT solutions offer centralized control, encryption, and audit trails. They enhance security and compliance.
+    - *Cloud-Based Solutions*: Consider cloud storage services (e.g., Dropbox, Google Drive) with robust security features.
 
-Bu skripti işlətməzdən əvvəl, `your_email@example.com`, `receiver_email@example.com` və `smtp.example.com` kimi yer tutucuları öz məlumatlarınızla əvəz etməlisiniz. Həmçinin, SMTP serverinizin portunu və ünvanını dəqiq bilirsinizsə, onları da düzgün şəkildə daxil etməlisiniz.
+Remember, responsible disclosure benefits everyone: the organization, its clients, and the broader cybersecurity community. By acting transparently and ethically, we contribute to a safer ICT ecosystem¹.
 
-10.Bir web saytının təhlükəsizliyini yoxlamaq üçün Python skripti necə yazılır?
-Web saytının təhlükəsizliyini yoxlamaq üçün Python skripti yazmaq, saytın müxtəlif təhlükəsizlik aspektlərini yoxlamağı əhatə edə bilər. Bu, adətən, saytın SSL/TLS sertifikatlarını, başlıq məlumatlarını, açıq portları və potensial zəiflikləri yoxlamağı daxil edir. Bununla birlikdə, bu cür təhlillər mütəxəssis biliklər və təhlükəsizlik sahəsində təcrübə tələb edir.
 
-Python'da `requests`, `ssl` və `socket` kimi standart kitabxanalardan istifadə edərək əsas bir web saytı təhlükəsizlik yoxlaması skripti yazmaq mümkündür.
+#3
 
-SSL/TLS Sertifikat Yoxlaması
 
-SSL/TLS sertifikatlarını yoxlamaq, web saytının şifrələmə təhlükəsizliyini yoxlamaq üçün vacibdir. Aşağıdakı nümunədə, `requests` kitabxanası istifadə edilərək bir saytın SSL/TLS sertifikatının etibarlılığını yoxlayırıq:
+You are tasked with explaining the difference between human vulnerabilities and software vulnerabilities in the context of hacking. How would you distinguish between the two types of vulnerabilities, and why is it important for ethical hackers to understand them?
 
-```python
-import requests
 
-def check_ssl_certificate(url):
-    try:
-        response = requests.get(url)
-        if response.history:
-            print(f"Redirected from {url} to {response.url}")
-        if response.ok:
-            print(f"SSL/TLS sertifikatı {url} üçün etibarlıdır.")
-        else:
-            print(f"SSL/TLS sertifikatı {url} üçün etibarlı deyil.")
-    except requests.exceptions.SSLError as e:
-        print(f"SSL/TLS xəta: {e}")
+Let's delve into the fascinating world of vulnerabilities and understand the nuances between human vulnerabilities and software vulnerabilities in the context of hacking.
 
-# Yoxlanılacaq URL
-check_ssl_certificate("https://www.example.com")
-```
+1. *Human Vulnerabilities*:
+   - *Definition*: Human vulnerabilities refer to weaknesses or shortcomings in human behavior, decision-making, or actions that can be exploited by malicious actors.
+   - *Examples*:
+     - Falling for *phishing* emails: Humans may unknowingly click on malicious links or provide sensitive information to attackers.
+     - *Social engineering*: Manipulating individuals into revealing confidential data or granting unauthorized access.
+     - *Lack of security awareness*: Employees not following security best practices.
+   - *Importance for Ethical Hackers*:
+     - Understanding human vulnerabilities helps ethical hackers design effective security awareness programs.
+     - It enables them to simulate real-world attacks and identify weak points in an organization's human defenses.
 
-Bu skript, verilmiş URL üçün SSL/TLS sertifikatının etibarlılığını yoxlayır.
+2. *Software Vulnerabilities*:
+   - *Definition*: Software vulnerabilities are flaws, weaknesses, or bugs in software code, applications, or systems.
+   - *Examples*:
+     - *Buffer overflows*: A common vulnerability where an attacker can overwrite memory beyond its allocated bounds.
+     - *SQL injection*: Exploiting poorly sanitized input to manipulate databases.
+     - *Unpatched software*: Failing to update software with security patches.
+   - *Importance for Ethical Hackers*:
+     - Identifying software vulnerabilities allows ethical hackers to:
+       - *Penetration testing*: Actively search for weaknesses in software.
+       - *Secure code reviews*: Analyze code to find vulnerabilities during development.
+       - *Patch management*: Ensure timely updates to fix vulnerabilities.
 
-### Bağlantı Portlarının Yoxlanılması
+3. *Why Ethical Hackers Must Understand Both*:
+   - *Holistic Approach*: Ethical hackers need to address both human and software vulnerabilities to create robust defenses.
+   - *Attack Surface*: A comprehensive understanding helps them assess the entire attack surface.
+   - *Risk Mitigation*: By addressing both aspects, they reduce the overall risk of successful attacks.
+   - *Educating Users*: Ethical hackers can educate users about human vulnerabilities and promote security awareness.
 
-Aşağıdakı nümunədə, `socket` kitabxanası istifadə edilərək bir serverin müəyyən portlarının açıq olub-olmadığını yoxlayırıq:
+In summary, ethical hackers must appreciate the interplay between human and software vulnerabilities to build effective security strategies and protect organizations from cyber threats¹⁵.
 
-```python
-import socket
 
-def check_port(host, port):
-    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    sock.settimeout(1)  # Timeout müddətini 1 saniyəyə qoyuruq
-    result = sock.connect_ex((host, port))
-    if result == 0:
-        print(f"Port {port} açıqdır.")
-    else:
-        print(f"Port {port} bağlıdır.")
-    sock.close()
 
-# Yoxlanılacaq host və portlar
-host = "example.com"
-ports = [80, 443, 8080, 8443]
 
-for port in ports:
-    check_port(host, port)
-```
+Outline the structure and components of a comprehensive WiFi penetration test report. Why is it essential for ethical hackers to adhere to a structured reporting format? Discuss the ethical and legal implications of penetration testing and reporting.
 
-Bu skript, verilmiş hostun müəyyən portlarının açıq olub-olmadığını yoxlayır.
-11.SSH vasitəsilə şəbəkə cihazlarını idarə etmək üçün Python skripti necə hazırlanır?
-SSH vasitəsilə şəbəkə cihazlarını idarə etmək üçün Python skripti yazmaq, `paramiko` kimi SSH protokolu üçün nəzərdə tutulmuş kitabxanalardan istifadə etməyi tələb edir. `Paramiko` geniş istifadə olunan bir Python kitabxanasıdır ki, SSH2 protokolu ilə əlaqə qurmaq və şəbəkə cihazları ilə əməliyyatlar aparmaq üçün istifadə edilir.
 
-Aşağıda, SSH vasitəsilə bir şəbəkə cihazına bağlanıb, bəzi əmrləri icra etmək və nəticələri oxumaq üçün sadə bir `paramiko` skripti nümunəsi verilmişdir.
+Let's dive into the world of WiFi penetration testing reports, their structure, and the critical considerations for ethical hackers.
 
-Əvvəlcə, `paramiko` kitabxanasını quraşdırın:
+## *Structure of a Comprehensive WiFi Penetration Test Report*
 
-```bash
-pip install paramiko
-```
+A well-structured WiFi penetration test report provides clear insights into the security posture of an organization's wireless network. Here are the essential components:
 
-Daha sonra aşağıdakı skripti yazaraq şəbəkə cihazı ilə əlaqə qura bilərsiniz:
+1. *Introduction*:
+   - Briefly introduce the purpose of the report, the scope of the assessment, and the systems/networks tested.
+   - Mention the authorization obtained to conduct the test.
 
-```python
-import paramiko
+2. *Executive Summary*:
+   - A concise overview for management and stakeholders.
+   - Highlights key findings, risks, and recommendations.
+   - Provides a high-level understanding of the security status.
 
-def ssh_command(host, port, username, password, command):
-    # SSH bağlantısını yaradırıq
-    ssh = paramiko.SSHClient()
-    ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-    ssh.connect(host, port, username, password)
+3. *Methodology*:
+   - Describe the testing approach, tools, and techniques used.
+   - Explain how the assessment was conducted (e.g., active scanning, passive monitoring, etc.).
 
-    # Komandaları icra edirik
-    stdin, stdout, stderr = ssh.exec_command(command)
-    output = stdout.read().decode('utf-8')
+4. *Scope and Objectives*:
+   - Clearly define the boundaries of the assessment (specific networks, devices, locations).
+   - State the goals and objectives of the penetration test.
 
-    # Bağlantını bağlayırıq
-    ssh.close()
+5. *Findings and Vulnerabilities*:
+   - Detailed analysis of vulnerabilities discovered during testing.
+   - Prioritize vulnerabilities based on severity (critical, high, medium, low).
+   - Include technical details, such as proof of concept (PoC) code and screenshots.
+   - Categorize findings (e.g., weak encryption, misconfigured access points).
 
-    return output
+6. *Exploitation Details*:
+   - Describe successful exploitation scenarios.
+   - Explain how attackers could abuse the identified vulnerabilities.
+   - Include steps to reproduce the exploitation.
 
-# Şəbəkə cihazının detalları
-host = "192.168.1.1"
-port = 22
-username = "admin"
-password = "yourpassword"
-command = "show ip interface brief"
+7. *Risk Assessment and Impact*:
+   - Evaluate the potential impact of each vulnerability.
+   - Consider business impact, data exposure, and potential financial losses.
+   - Provide a risk rating (e.g., using CVSS scores).
 
-# SSH vasitəsilə komanda icra etmək
-result = ssh_command(host, port, username, password, command)
-print(result)
-```
+8. *Recommendations and Remediation*:
+   - Suggest actionable steps to mitigate vulnerabilities.
+   - Prioritize recommendations based on risk and impact.
+   - Include technical guidance for remediation (e.g., configuration changes, patching).
 
-Bu skript, verilmiş şəbəkə cihazına (host, port, username, password) SSH vasitəsilə bağlanır, göndərilmiş komandanı (`command`) icra edir və nəticələri çap edir.
+9. *Conclusion*:
+   - Summarize the overall findings.
+   - Reiterate the importance of addressing identified issues.
+   - Highlight any positive aspects of the network's security.
 
-12.Python ilə bir təhlükəsizlik audit skripti necə yazılır?
-Bir təhlükəsizlik audit skripti yazmaq, mürəkkəb və spesifik bir prosesdir və bu skriptlər, çox fərqli təhlükəsizlik yoxlamalarını əhatə edə bilər. Python ilə təhlükəsizlik audit skripti yazarkən, adətən, aşağıdakı kimi yoxlamaları həyata keçirmək olar:
+10. *Appendices*:
+    - Include additional technical details, logs, and supporting evidence.
+    - Attach network diagrams, scan results, and any relevant documentation.
 
-1. Açıq Portların Yoxlanılması: Sistemdəki açıq portları aşkarlamaq üçün `socket` modulundan istifadə edə bilərsiniz.
-2. SSL/TLS Sertifikatlarının Yoxlanılması: Web serverlərin SSL/TLS sertifikatlarını yoxlamaq üçün `requests` və `ssl` modullarını istifadə edə bilərsiniz.
-3. Zəif Parolların Yoxlanılması: Sistemdəki zəif və ya standart parolları aşkarlamaq üçün brute-force yanaşmasını istifadə edə bilərsiniz.
-4. Tətbiqetmə Zəifliklərinin Yoxlanılması: XSS, SQL injeksiyası kimi web tətbiqetmə zəifliklərini yoxlamaq üçün `requests` və özəl yoxlama skriptləri istifadə edə bilərsiniz.
+## *Importance of Structured Reporting*
 
-Açıq Portların Yoxlanılması
+- *Effective Communication*: A structured report ensures that findings are communicated clearly to technical and non-technical stakeholders. It facilitates decision-making and resource allocation.
 
-Aşağıdakı Python skripti, verilmiş bir IP ünvanındakı spesifik portların açıq olub-olmadığını yoxlayır:
+- *Client Understanding*: Clients need actionable insights. A well-organized report helps them understand risks, prioritize fixes, and allocate resources effectively.
 
-import socket
+- *Legal and Ethical Implications*
 
-def scan_port(ip, port):
-    try:
-        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        sock.settimeout(1)
-        result = sock.connect_ex((ip, port))
-        if result == 0:
-            print(f"Port {port} açıqdır.")
-        else:
-            print(f"Port {port} bağlıdır.")
-        sock.close()
-    except socket.error as e:
-        print(f"Xəta: {e}")
+  - *Authorization*: Always obtain explicit permission before testing. Unauthorized testing can lead to legal consequences.
+  - *Transparency*: Ethical hackers must be transparent about their methods and tools. Clients deserve full disclosure.
+  - *Confidentiality*: Protect sensitive data collected during testing. Avoid public disclosure of vulnerabilities.
+  - *Responsibility*: Conduct tests responsibly, avoiding harm to employees, customers, or stakeholders.
 
-# Yoxlanılacaq IP ünvanı və port siyahısı
-target_ip = "192.168.1.1"
-ports_to_scan = [22, 80, 443]
+Remember, ethical hackers play a crucial role in improving security, but they must adhere to ethical guidelines and legal boundaries to maintain trust and integrity¹⁶⁹.
 
-for port in ports_to_scan:
-    scan_port(target_ip, port)
-```
 
-Bu skript, `target_ip` ünvanındakı hər bir portu (`ports_to_scan` siyahısında göstərilmiş) yoxlayır və portun açıq olub-olmadığını bildirir.
-13. Python-da fayl şifrələmək üçün skript necə yazılır?
-Python ilə fayl şifrələmək üçün, kriptografiya kitabxanalarından birini, məsələn, `cryptography` kitabxanasını istifadə etmək məqsədəuyğundur. `cryptography` kitabxanası, həm asanlıqla istifadə oluna bilən yüksək səviyyəli şifrələmə interfeysləri, həm də aşağı səviyyəli kriptografiya əməliyyatları üçün vasitələr təqdim edir.
 
-cryptography Kitabxanasını Quraşdırmaq
-pip install cryptography
-Fayl Şifrələmə Skripti
+Reconnaissance Techniques Explain the significance of reconnaissance in ethical hacking. Compare and contrast DNS and web reconnaissance techniques. How can ethical hackers utilize these techniques to gather information without crossing legal boundaries?
 
-from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
-from cryptography.hazmat.backends import default_backend
-import os
 
-def encrypt_file(file_path, key, iv):
-    # AES Cipher obyektini yaradırıq
-    cipher = Cipher(algorithms.AES(key), modes.CFB(iv), backend=default_backend())
+ Let's explore the world of reconnaissance in ethical hacking, compare DNS and web reconnaissance techniques, and discuss how ethical hackers can stay within legal boundaries while gathering information.
 
-    # Faylı oxuyub şifrələyirik
-    with open(file_path, 'rb') as f:
-        file_data = f.read()
-        encryptor = cipher.encryptor()
-        encrypted_data = encryptor.update(file_data) + encryptor.finalize()
+## *Significance of Reconnaissance in Ethical Hacking*
 
-    # Şifrələnmiş məlumatı eyni fayla yazırıq
-    with open(file_path, 'wb') as f:
-        f.write(encrypted_data)
+Reconnaissance is *crucial* in ethical hacking for several reasons:
 
-# Şifrələmə açarı və IV (Initialization Vector) yaradırıq
-key = os.urandom(32)  # AES üçün 256-bit açar
-iv = os.urandom(16)   # AES CFB üçün IV
+1. *Understanding the Landscape*:
+   - Before launching any attack, ethical hackers need a comprehensive understanding of the target environment.
+   - Reconnaissance helps identify potential vulnerabilities, weak points, and entry paths.
 
-# Şifrələmək istədiyiniz faylın yolu
-file_to_encrypt = 'path/to/your/file.txt'
+2. *Risk Assessment*:
+   - By gathering information, ethical hackers assess the risk associated with the target systems.
+   - They prioritize efforts based on critical areas that need attention.
 
-encrypt_file(file_to_encrypt, key, iv)
-```
+3. *Attack Planning*:
+   - Reconnaissance provides insights into the target's infrastructure, services, and potential attack vectors.
+   - It guides the development of an effective penetration testing strategy.
 
-Bu skript, AES şifrələmə alqoritmini CFB rejimi ilə birlikdə istifadə edərək faylı şifrələyir. Açar (`key`) və ilkinləşdirmə vektoru (`iv`) təsadüfi yaradılır.
+## *DNS Reconnaissance vs. Web Reconnaissance*
 
-- Şifrələmə açarını və IV-ni təhlükəsiz bir şəkildə saxlamaq çox vacibdir, çünki bunlar olmadan şifrələnmiş məlumatları deşifrə etmək mümkün olmayacaq.
-- Bu nümunədə açar və IV hər dəfə yeni yaradılır. Praktik istifadədə, bu məlumatları bir yerdə saxlayıb lazım olduqda istifadə etməlisiniz.
-14. Python ilə bir şəbəkə monitorinq skripti necə yazılır?
-Python ilə şəbəkə monitorinq skripti yazmaq, şəbəkə trafikini, cihaz vəziyyətlərini, və ya şəbəkədəki xüsusi hadisələri izləməyi əhatə edə bilər. Bir şəbəkə monitorinq skripti yazmaq üçün `ping` əməliyyatları, port tarama, və ya şəbəkə paketlərinin dinlənilməsi kimi metodlardan istifadə edilə bilər. Aşağıda, şəbəkədəki cihazların onlayn olub-olmadığını yoxlayan sadə bir Python skripti nümunəsi verilmişdir.
+### *DNS Reconnaissance*
 
-Bu skript, IP ünvanları siyahısını `ping` edərək hər bir cihazın şəbəkədə olub-olmamasını yoxlayır. Python'un standart kitabxanasında `ping` funksiyası olmadığı üçün, əməliyyat sisteminin komanda sətri vasitəsilə `ping` əməliyyatını həyata keçirəcəyik.
+- *Purpose*: DNS enumeration involves discovering all DNS records associated with a domain.
+- *Tools and Techniques*:
+  - *Nslookup, **Host, **Dig, **Fierce, **WHOIS, **DNSEnum*, and more.
+- *Objectives*:
+  - Identify DNS servers, subdomains, and IP addresses.
+  - Uncover information useful for further analysis and attack planning.
+- *Importance*:
+  - Helps map the infrastructure.
+  - Reveals subdomains and potential vulnerable targets.
+  - Guides attack paths.
 
-### Şəbəkə Monitorinq Skripti
+### *Web Reconnaissance*
 
-```python
-import os
-import subprocess
+- *Purpose*: Web reconnaissance focuses on gathering information about web applications, services, and endpoints.
+- *Techniques*:
+  - *Scanning, **crawling, **OSINT (Open Source Intelligence), and **Google dorking*.
+- *Objectives*:
+  - Identify web servers, technologies, directories, and hidden content.
+  - Discover exposed APIs, sensitive files, and misconfigurations.
+- *Importance*:
+  - Provides insights into web application architecture.
+  - Helps find entry points for exploitation.
+  - Guides further testing (e.g., vulnerability scanning).
 
-def ping_host(ip):
-    # Əməliyyat sisteminə görə `ping` əmri
-    param = '-n' if os.name == 'nt' else '-c'
+## *Ethical Use and Legal Boundaries*
 
-    # `ping` əmrini icra etmək
-    command = ['ping', param, '1', ip]
-    response = subprocess.run(command, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-    return response.returncode == 0
+1. *Authorization*:
+   - Always obtain explicit permission before conducting reconnaissance.
+   - Unauthorized testing can lead to legal consequences.
 
-# Yoxlanılacaq IP ünvanları siyahısı
-hosts = ["192.168.1.1", "192.168.1.2", "192.168.1.3"]
+2. *Transparency*:
+   - Ethical hackers must disclose their methods and tools to clients.
+   - Full transparency builds trust.
 
-# Hər bir hostu `ping` edərək yoxlamaq
-for host in hosts:
-    is_up = ping_host(host)
-    status = "Onlayn" if is_up else "Ofsayn"
-    print(f"{host} {status}")
-```
+3. *Confidentiality*:
+   - Protect sensitive data collected during reconnaissance.
+   - Avoid public disclosure of vulnerabilities.
 
-Bu skript, `hosts` siyahısındakı hər bir IP ünvanı üçün `ping` əməliyyatını həyata keçirir və hər bir cihazın şəbəkədə olub-olmadığını yoxlayır. `subprocess.run` funksiyası ilə əməliyyat sisteminin `ping` əmrini icra edirik. 
+4. *Responsibility*:
+   - Conduct tests responsibly, avoiding harm to individuals or organizations.
+   - Adhere to ethical guidelines and legal boundaries.
 
-- Bəzi sistemlər və ya şəbəkə konfiqurasiyaları `ping` cavablarını bloka edə bilər, bu halda skriptin nəticələri düzgün olmaya bilər.
-- Şəbəkə monitorinqi, daha geniş və mürəkkəb bir sahədir və bu sadə nümunə, şəbəkə monitorinqinin bütün aspektlərini əhatə etmir.
-15. Python-da bir şəbəkə qurğusundan məlumat toplama skripti necə yazılır?
-Şəbəkə qurğusundan məlumat toplamaq üçün Python skripti yazmaq, adətən, şəbəkə qurğuları ilə SSH və ya SNMP protokolları vasitəsilə rabitə qurmağı əhatə edir. SSH üçün `paramiko` kitabxanasından, SNMP üçün isə `pysnmp` kimi kitabxanalardan istifadə edə bilərsiniz.
+In summary, reconnaissance is the foundation of ethical hacking. By using DNS and web reconnaissance techniques responsibly, ethical hackers can gather critical information without crossing legal lines¹⁶⁹.
 
-Aşağıda, `paramiko` kitabxanasını istifadə edərək bir şəbəkə qurğusuna SSH vasitəsilə bağlanıb məlumat toplamaq üçün bir Python skripti nümunəsi verilmişdir. Bu skript, SSH vasitəsilə şəbəkə qurğusuna bağlanır, müəyyən bir əmr icra edir (məsələn, `show version` və ya `show ip interface brief` kimi) və çıxışı oxuyur.
 
-Əvvəlcə `paramiko` kitabxanasını quraşdırın:
+#4
 
-```bash
-pip install paramiko
-```
+Describe the process of scanning using nmap. Discuss the types of information that can be obtained through nmap scans and how this information can aid in vulnerability assessment and penetration testing.
 
-Sonra aşağıdakı skripti yazaraq şəbəkə qurğusundan məlumat toplaya bilərsiniz:
 
-```python
-import paramiko
+*Nmap* (short for *Network Mapper*) is a powerful open-source command-line tool used by penetration testers and network administrators. Let's delve into its process, the information it provides, and its role in vulnerability assessment and penetration testing.
 
-def get_device_info(host, port, username, password, command):
-    # SSH bağlantısını yaradırıq
-    ssh = paramiko.SSHClient()
-    ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-    ssh.connect(host, port, username, password)
+### Nmap Scanning Process:
+1. *Host Discovery*:
+    - Nmap begins by identifying active devices on the network. It employs various techniques, including ICMP echo requests, TCP SYN scans, and ARP requests, to determine which hosts are online and available for further scanning.
+    - This initial step helps map out the network and identify reachable devices.
 
-    # Əmri icra edirik və çıxışı oxuyuruq
-    stdin, stdout, stderr = ssh.exec_command(command)
-    output = stdout.read().decode('utf-8')
-    ssh.close()
+2. *Port Scanning*:
+    - After discovering active hosts, Nmap proceeds to scan specific ports on these hosts.
+    - Port scanning involves checking the status of individual ports (open, closed, or filtered) on a target system.
+    - Nmap uses different scan types to achieve this:
+        - *Ping Scan*:
+            - Scans the list of devices up and running on a given subnet.
+            - Example command: nmap -sp 192.168.1.1/24
+        - *Single Host Scan*:
+            - Scans a single host for 1000 well-known ports (e.g., SQL, SNTP, Apache).
+            - Example command: nmap scanme.nmap.org
+        - *Stealth Scan (SYN Scan)*:
+            - Sends an SYN packet and analyzes the response.
+            - If SYN/ACK is received, the port is open, allowing a potential TCP connection.
+            - Stealth scans avoid completing the 3-way handshake, making it harder for the target to detect the scanning system.
+            - Example command: nmap -sS scanme.nmap.org
 
-    return output
+### Types of Information Obtained:
+1. *Device Identification*:
+    - Nmap quickly recognizes all devices (servers, routers, switches, mobile devices) on single or multiple networks.
+    - Helps network admins understand their network's composition.
 
-# Şəbəkə qurğusunun detalları
-host = "192.168.1.1"
-port = 22
-username = "your_username"
-password = "your_password"
-command = "show version"  # Məsələn, Cisco IOS üçün
+2. *Service Detection*:
+    - Identifies services running on a system (e.g., web servers, DNS servers, common applications).
+    - Nmap can even detect application versions, aiding in vulnerability assessment.
 
-# SSH vasitəsilə məlumat toplamaq
-device_info = get_device_info(host, port, username, password, command)
-print(device_info)
-```
+3. *Operating System Fingerprinting*:
+    - Provides detailed information about the OS running on devices.
+    - Detects OS versions, assisting in planning additional approaches during penetration testing.
 
-Bu skriptdə `get_device_info` funksiyası, verilmiş şəbəkə qurğusuna bağlanır və göndərilmiş əmri icra edir. Nəticədə alınan məlumatları dönür.
+4. *Vulnerability Assessment*:
+    - During security auditing, Nmap can attack systems using existing scripts from the Nmap Scripting Engine.
+    - Helps uncover vulnerabilities by probing services and applications.
 
-16. Python ilə bir faylın inteqrasiyasını yoxlamaq üçün skript necə yazılır?
-Faylın inteqrasiyasını yoxlamaq üçün Python skripti yazmaq, adətən, faylın kriptografik hash dəyərini (məsələn, MD5, SHA-1, SHA-256) hesablamaq və bu dəyəri gözlənilən bir dəyərlə müqayisə etmək prosesini əhatə edir. Bu yanaşma, faylın dəyişdirilmədən qaldığını yoxlamaq üçün istifadə olunur.
+5. *Graphical Mapping*:
+    - Nmap's graphical user interface, *Zenmap*, creates visual network maps for better usability and reporting.
 
-Aşağıda, Python ilə bir faylın SHA-256 hash dəyərini hesablayıb, bu dəyəri gözlənilən bir hash ilə müqayisə edən bir skript nümunəsi verilmişdir:
+In summary, Nmap's versatility, ease of use, and ability to provide critical network information make it an essential tool for both security professionals and penetration testers¹²³⁴⁵..
 
-```python
-import hashlib
 
-def calculate_file_hash(file_path, hash_type='sha256'):
-    hash_obj = hashlib.new(hash_type)
-    with open(file_path, 'rb') as file:
-        for chunk in iter(lambda: file.read(4096), b""):
-            hash_obj.update(chunk)
-    return hash_obj.hexdigest()
 
-def verify_file_integrity(file_path, expected_hash, hash_type='sha256'):
-    calculated_hash = calculate_file_hash(file_path, hash_type)
-    if calculated_hash == expected_hash:
-        return True
-    else:
-        return False
+Discuss the security implications of commonly used file transfer protocols such as FTP, HTTP, and Telnet. What are the risks associated with each protocol, and how can organizations mitigate these risks to protect sensitive data?
 
-# Fayl yolu və gözlənilən hash dəyəri
-file_path = 'path/to/your/file.txt'
-expected_hash = 'your_expected_sha256_hash_here'
 
-# Fayl inteqrasiyasını yoxlamaq
-is_intact = verify_file_integrity(file_path, expected_hash)
-if is_intact:
-    print(f"Fayl {file_path} inteqrasiyası qorunub.")
-else:
-    print(f"Fayl {file_path} inteqrasiyası pozulub.")
-```
 
-Bu skriptdə `calculate_file_hash` funksiyası verilmiş faylın hash dəyərini hesablayır, `verify_file_integrity` funksiyası isə hesablanan hash dəyərini gözlənilən dəyərlə müqayisə edir.
-- Faylın inteqrasiyasını yoxlamaq üçün istifadə edilən hash metodunu və dəyərini etibarlı bir mənbədən əldə etmək vacibdir.
-- MD5 və SHA-1 kimi köhnə hash funksiyaları artıq təhlükəsiz sayılmır və mümkün olduqda SHA-256 kimi daha güclü hash funksiyalarından istifadə etmək tövsiyə olunur.
-- Bu yanaşma, faylın təsadüfi və ya qəsdən dəyişdirilməməsi barədə bir təminat verir, lakin faylın məzmununu və ya məqsədini qiymətləndirmir.
+Certainly! Let's delve into the security implications of *FTP, **HTTP, and **Telnet*, along with strategies to mitigate risks associated with each protocol:
 
-17. Python ilə bir şifrə yaradıcı skript necə yazılır?
-Python ilə güclü və təsadüfi şifrələr yaradmaq üçün `secrets` və `string` modullarından istifadə edə bilərsiniz. `secrets` modulu, təsadüfi məlumatlar yaratmaq üçün kriptografik cəhətdən etibarlı vasitələr təqdim edir, ki bu da şifrələrin güclü və təhlükəsiz olmasını təmin edir.
+1. *File Transfer Protocol (FTP)*:
+    - *Risk Factors*:
+        - *Lack of Encryption: FTP was not designed with security in mind. It relies on **clear-text* usernames and passwords for authentication, making it vulnerable to *sniffing, **spoofing, and **brute force attacks*.
+        - *Data Exposure*: Data transmitted via FTP is shared in plain text, allowing attackers to intercept sensitive information easily.
+    - *Mitigation Strategies*:
+        - *Use SFTP (Secure FTP): SFTP, also known as **SSH File Transfer Protocol*, provides encrypted data transfer over SSH. It ensures confidentiality and integrity during file transfers.
+        - *Implement Strong Authentication: Use **public-key authentication* or *two-factor authentication* to enhance security.
+        - *Limit FTP Access*: Disable anonymous FTP access and restrict FTP to authorized users only.
+        - *Monitor FTP Traffic*: Regularly monitor FTP traffic for suspicious activity.
 
-Aşağıdakı Python skripti, istifadəçi tərəfindən müəyyən edilmiş uzunluqda təsadüfi, güclü bir şifrə yaradır:
+2. *Hypertext Transfer Protocol (HTTP)*:
+    - *Risk Factors*:
+        - *Lack of Encryption*: HTTP transmits data in plain text, exposing it to interception by attackers.
+        - *Man-in-the-Middle Attacks*: Without encryption, attackers can intercept and manipulate data between the client and server.
+    - *Mitigation Strategies*:
+        - *Use HTTPS: Transition to **HTTPS (HTTP Secure)*, which encrypts data using SSL/TLS. Obtain an SSL certificate for your web server.
+        - *Implement HSTS (HTTP Strict Transport Security)*: Enforce secure connections by ensuring that clients always use HTTPS.
+        - *Regularly Update Web Servers*: Keep web servers and software up to date to address security vulnerabilities.
 
-```python
-import secrets
-import string
+3. *Telnet*:
+    - *Risk Factors*:
+        - *Clear-Text Communication*: Telnet sends data in plain text, including usernames and passwords, making it susceptible to eavesdropping.
+        - *No Encryption*: Lack of encryption allows attackers to intercept and manipulate Telnet sessions.
+    - *Mitigation Strategies*:
+        - *Replace Telnet with SSH: Migrate to **SSH (Secure Shell)* for remote access. SSH provides encryption and secure authentication.
+        - *Disable Telnet*: If possible, disable Telnet services altogether.
+        - *Network Segmentation*: Isolate critical systems from Telnet exposure by segmenting networks.
 
-def generate_password(length, complexity=3):
-    # Mümkün simvolların siyahıları
-    characters = [
-        string.ascii_lowercase,  # Kiçik hərflər
-        string.ascii_uppercase,  # Böyük hərflər
-        string.digits,           # Rəqəmlər
-        string.punctuation       # Xüsusi simvollar
-    ]
+In summary, organizations should prioritize secure alternatives (such as SFTP, HTTPS, and SSH) over insecure protocols. Regular security assessments, monitoring, and timely updates are crucial to safeguard sensitive data during file transfers¹²³⁴.
 
-    # Şifrənin mürəkkəbliyinə görə simvolları seçmək
-    if complexity < 1 or complexity > 4:
-        raise ValueError("Complexity must be between 1 and 4")
 
-    chosen_characters = ''.join(characters[:complexity])
-    
-    # Təsadüfi şifrə yaratmaq
-    password = ''.join(secrets.choice(chosen_characters) for i in range(length))
 
-    return password
+Assess the security risks associated with Voice over Internet Protocol (VOIP) systems, including Cisco CUCM, Asterisk, Elastix, and Issabel. How can organizations mitigate the vulnerabilities inherent in VOIP infrastructure to prevent unauthorized access and eavesdropping?
 
-# Şifrənin uzunluğu və mürəkkəbliyi
-password_length = 12
-password_complexity = 4  # 1-dən 4-ə qədər (daha çox simvol növü istifadə etmək)
 
-# Şifrə yaratmaq
-password = generate_password(password_length, password_complexity)
-print(password)
-```
 
-Bu skriptdə `generate_password` funksiyası, təyin edilmiş uzunluq və mürəkkəblik dərəcəsinə görə şifrə yaradır. `complexity` dəyişəni 1-dən 4-ə qədər ola bilər və bu, şifrənin yalnız hərflərdən, hərflər və rəqəmlərdən, yaxud hərflər, rəqəmlər və xüsusi simvolların birləşməsindən ibarət olmasını müəyyən edir.
-- Şifrələrin etibarlı və təhlükəsiz saxlanılması çox vacibdir. Şifrələri açıq mətndə saxlamaq və ya şifrələri təkrar istifadə etmək təhlükəsiz deyil.
-- İstifadə edəcəyiniz sistem və ya servis üçün xüsusi şifrə tələblərini nəzərə alın (məsələn, xüsusi simvolların istifadəsi və ya maksimum uzunluq məhdudiyyətləri).
-18. Python ilə bir təhlükəsizlik siyasəti yoxlamaq üçün skript necə yazılır?
-Bir təhlükəsizlik siyasətini yoxlamaq üçün Python skripti yazmaq, şirkətin və ya təşkilatın təhlükəsizlik standartlarına uyğunluğu yoxlamaq üçün bir sıra yoxlamaları əhatə edə bilər. Bu yoxlamalar, parol siyasətləri, şəbəkə konfiqurasiyaları, sistem təhlükəsizlik tədbirləri və digər təhlükəsizliklə əlaqədar aspektlər ola bilər.
+*Voice over Internet Protocol (VoIP)* systems offer efficient communication but come with inherent security risks. Let's explore these risks and discuss mitigation strategies for each system:
 
-Aşağıda, müəyyən bir təhlükəsizlik siyasətinin tətbiq olunub-olunmadığını yoxlayan Python skriptinin nümunəsi verilmişdir. Bu nümunə, sistemin müəyyən bir şəbəkə portunun açıq olub-olmamasını və müəyyən bir faylın mövcudluğunu yoxlayır, ki bu da təhlükəsizlik siyasətinin bir hissəsi ola bilər.
+1. *Cisco Unified Communications Manager (CUCM)*:
+    - *Risk Factors*:
+        - *Eavesdropping*: Attackers can intercept VoIP calls, capturing audio data.
+        - *Unauthorized Access*: Weak authentication mechanisms may allow unauthorized users to gain access.
+    - *Mitigation*:
+        - *Hardening*: Cisco CUCM runs as a virtual machine with proprietary hardening changes. Unused modules are excluded, and native interfaces are secured¹.
+        - *Regular Updates*: Keep CUCM up to date with security patches and firmware updates.
+        - *Access Control*: Restrict access to authorized users and monitor for anomalies.
 
-Təhlükəsizlik Siyasəti Yoxlama Skripti
+2. *Asterisk*:
+    - *Risk Factors*:
+        - *Default Credentials*: Asterisk installations often use default credentials, making them vulnerable.
+        - *Software Bugs*: Unpatched vulnerabilities can lead to unauthorized access.
+    - *Mitigation*:
+        - *Change Default Credentials*: Modify default passwords immediately after installation.
+        - *Regular Security Audits*: Regularly assess and update Asterisk installations.
+        - *Firewall Rules*: Restrict access to trusted IP addresses.
 
-```python
-import socket
-import os
+3. *Elastix*:
+    - *Risk Factors*:
+        - *Outdated Software*: Elastix may run outdated components with known vulnerabilities.
+        - *Insecure Configuration*: Misconfigured settings can expose sensitive data.
+    - *Mitigation*:
+        - *Update Components*: Keep Elastix, Asterisk, and other components up to date.
+        - *Secure Configuration*: Disable unnecessary services and apply security best practices.
+        - *Network Segmentation*: Isolate VoIP traffic from other network segments.
 
-def check_port_open(host, port):
-    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-        return s.connect_ex((host, port)) == 0
+4. *Issabel*:
+    - *Risk Factors*:
+        - *Weak Authentication*: Default credentials or weak passwords can compromise security.
+        - *Unencrypted Traffic*: Lack of encryption exposes data to eavesdropping.
+    - *Mitigation*:
+        - *Strong Authentication*: Enforce strong passwords and consider two-factor authentication.
+        - *TLS Encryption*: Enable Transport Layer Security (TLS) for secure communication.
+        - *Regular Audits*: Assess Issabel configurations periodically.
 
-def check_file_exists(file_path):
-    return os.path.exists(file_path)
-
-# Təhlükəsizlik siyasəti yoxlamaları
-security_policy_checks = {
-    "Şəbəkə Portu Yoxlaması": check_port_open("localhost", 22),
-    "Mühüm Faylın Mövcudluğu Yoxlaması": check_file_exists("/path/to/important/file")
-}
-
-# Nəticələri çap etmək
-for check, result in security_policy_checks.items():
-    status = "Keçdi" if result else "Uğursuz oldu"
-    print(f"{check}: {status}")
-```
-
-Bu skriptdə iki funksiya var: `check_port_open` və `check_file_exists`. `check_port_open` funksiyası verilmiş portun açıq olub-olmamasını yoxlayır, `check_file_exists` isə verilmiş yolda faylın mövcudluğunu yoxlayır. Daha sonra bu yoxlamalar `security_policy_checks` lüğətində yer alır və hər bir yoxlamanın nəticəsi çap edilir.
-
-
-
-
-Şəbəkə paketlərinin təhlili üçün Python skripti yazmaq, `scapy` kimi güclü bir şəbəkə təhlili kitabxanasından istifadə etməyi tələb edir. `scapy` vasitəsilə şəbəkə trafikini dinləyə bilər və HTTP istəklərinin başlıqlarını təhlil edə bilərsiniz. Aşağıda, HTTP istəklərinin başlıqlarını təhlil edən və müəyyən kriteriyalara əsasən məlumat çap edən Python skriptinin nümunəsi verilmişdir.
-
-İlk olaraq, `scapy` kitabxanasını quraşdırın:
-
-```bash
-pip install scapy
-```
-
-Sonra, aşağıdakı skripti yazın:
-
-```python
-from scapy.all import sniff
-from scapy.layers.http import HTTPRequest
-
-def packet_callback(packet):
-    if not packet.haslayer(HTTPRequest):
-        return
-
-    http_layer = packet.getlayer(HTTPRequest)
-    headers = http_layer.fields
-
-    # İstədiyiniz kriteriyalara uyğun paketləri filtrləyin
-    user_agent = headers.get('User-Agent')
-    host = headers.get('Host')
-
-    if user_agent is not None and host is not None:
-        print(f"Host: {host}, User-Agent: {user_agent}")
-
-# Şəbəkə paketlərini dinləmək
-sniff(filter="tcp port 80", prn=packet_callback, store=False)
-```
-
-Bu skript, şəbəkədəki TCP port 80-dən keçən trafiki dinləyir və HTTP istəklərinin başlıqlarını təhlil edir. `packet_callback` funksiyası hər bir paketi təhlil edir, HTTP istəklərinin `Host` və `User-Agent` başlıqlarını yoxlayır və onları çap edir.
-- `sniff` funksiyasının `filter` parametri, yalnız HTTP trafikini dinləmək üçün `tcp port 80` kimi təyin olunmuşdur. HTTPS trafiki üçün bu metod işləməyəcək, çünki HTTPS məlumatları şifrələnmişdir.
-
-
-
-Şəbəkə paketlərinin təhlili üçün Python skripti yazmaq, `scapy` kimi güclü bir şəbəkə təhlili kitabxanasından istifadə etməyi tələb edir. `scapy` vasitəsilə şəbəkə trafikini dinləyə bilər və HTTP istəklərinin başlıqlarını təhlil edə bilərsiniz. Aşağıda, HTTP istəklərinin başlıqlarını təhlil edən və müəyyən kriteriyalara əsasən məlumat çap edən Python skriptinin nümunəsi verilmişdir.
-
-İlk olaraq, `scapy` kitabxanasını quraşdırın:
-
-```bash
-pip install scapy
-```
-
-Sonra, aşağıdakı skripti yazın:
-
-```python
-from scapy.all import sniff
-from scapy.layers.http import HTTPRequest
-
-def packet_callback(packet):
-    if not packet.haslayer(HTTPRequest):
-        return
-
-    http_layer = packet.getlayer(HTTPRequest)
-    headers = http_layer.fields
-
-    # İstədiyiniz kriteriyalara uyğun paketləri filtrləyin
-    user_agent = headers.get('User-Agent')
-    host = headers.get('Host')
-
-    if user_agent is not None and host is not None:
-        print(f"Host: {host}, User-Agent: {user_agent}")
-
-# Şəbəkə paketlərini dinləmək
-sniff(filter="tcp port 80", prn=packet_callback, store=False)
-```
-
-Bu skript, şəbəkədəki TCP port 80-dən keçən trafiki dinləyir və HTTP istəklərinin başlıqlarını təhlil edir. `packet_callback` funksiyası hər bir paketi təhlil edir, HTTP istəklərinin `Host` və `User-Agent` başlıqlarını yoxlayır və onları çap edir.
-- `sniff` funksiyasının `filter` parametri, yalnız HTTP trafikini dinləmək üçün `tcp port 80` kimi təyin olunmuşdur. HTTPS trafiki üçün bu metod işləməyəcək, çünki HTTPS məlumatları şifrələnmişdir.
+In summary, organizations must prioritize VoIP security by implementing encryption, regular updates, access controls, and user education. Safeguarding business communications ensures operational continuity and confidentiality⁴⁵⁶⁷⁸.
